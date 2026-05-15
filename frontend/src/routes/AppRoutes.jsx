@@ -8,6 +8,7 @@ import Login from '../pages/Login'
 import Cadastro from '../pages/Cadastro'
 import Home from '../pages/Home'
 import Usuarios from '../pages/Usuarios'
+import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
 
 // Páginas ainda não implementadas (placeholder)
@@ -33,6 +34,12 @@ function AppRoutes() {
       <Route path="/" element={
         <PrivateRoute>
           <Home />
+        </PrivateRoute>
+      } />
+
+      <Route path="/perfil" element={
+        <PrivateRoute>
+          <Perfil />
         </PrivateRoute>
       } />
 

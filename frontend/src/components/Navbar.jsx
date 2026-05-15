@@ -60,9 +60,9 @@ function Navbar() {
 
         {/* Usuário logado e logout */}
         <div className="flex items-center gap-4">
-          <span className="text-sm text-verde-100">
-            {usuario?.nome} ({usuario?.perfil})
-          </span>
+          <Link to="/perfil" className="text-sm text-verde-100 hover:text-white transition-colors">
+            {usuario?.nome}
+          </Link>
           <button
             onClick={handleLogout}
             className="bg-white text-verde-700 text-sm font-semibold px-3 py-1 rounded hover:bg-verde-50 transition-colors"

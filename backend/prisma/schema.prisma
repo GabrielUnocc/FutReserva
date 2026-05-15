@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Perfis de acesso do sistema
+enum Perfil {
+  JOGADOR
+  DONO
+  ADMIN
+}
+
+enum StatusAgendamento {
+  PENDENTE
+  CONFIRMADO
+  CANCELADO
+}
+
+enum StatusPagamento {
+  PENDENTE
+  PAGO
+  CANCELADO
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+  perfil    Perfil   @default(JOGADOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  campos       Campo[]
+  agendamentos Agendamento[]
+}
+
+model Campo {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  endereco  String
+  descricao String?
+  preco     Float
+  donoId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dono     Usuario   @relation(fields: [donoId], references: [id])
+  horarios Horario[]
+}
+
+model Horario {
+  id         Int      @id @default(autoincrement())
+  campoId    Int
+  diaSemana  String
+  horaInicio String
+  horaFim    String
+  disponivel Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  campo        Campo         @relation(fields: [campoId], references: [id])
+  agendamentos Agendamento[]
+}
+
+model Agendamento {
+  id        Int               @id @default(autoincrement())
+  jogadorId Int
+  horarioId Int
+  data      DateTime
+  status    StatusAgendamento @default(PENDENTE)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  jogador   Usuario    @relation(fields: [jogadorId], references: [id])
+  horario   Horario    @relation(fields: [horarioId], references: [id])
+  pagamento Pagamento?
+}
+
+model Pagamento {
+  id            Int             @id @default(autoincrement())
+  agendamentoId Int             @unique
+  valor         Float
+  metodo        String
+  status        StatusPagamento @default(PENDENTE)
+  createdAt     DateTime        @default(now())
+
+  agendamento Agendamento @relation(fields: [agendamentoId], references: [id])
+}

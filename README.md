@@ -265,7 +265,7 @@ futreserva/
 
 | Integrante | Módulo |
 |---|---|
-| Bernardo | Autenticação, login, JWT e middlewares de permissão |
+|  Gabriel Rosario  | Autenticação, login, JWT e middlewares de permissão |
 | Gabriel Rosario | CRUD de usuários, telas de login, cadastro e perfil |
 | Rafael Lucas | CRUD de campos e catálogo público |
 | Rafael Machado | CRUD de horários disponíveis |

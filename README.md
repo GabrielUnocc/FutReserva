@@ -218,8 +218,8 @@ futreserva/
 
 | Módulo | Backend | Frontend | Responsável |
 |---|---|---|---|
-| Autenticação (cadastro + login + JWT) | Completo | Completo | Bernardo |
-| Controle de permissões (authMiddleware + permissaoMiddleware) | Completo | Completo | Bernardo |
+| Autenticação (cadastro + login + JWT) | Completo | Completo | Gabriel Rosario |
+| Controle de permissões (authMiddleware + permissaoMiddleware) | Completo | Completo | Gabriel Rosario |
 | CRUD de Usuários | Completo | Completo | Gabriel Rosario |
 | Tela de Login | — | Completo | Gabriel Rosario |
 | Tela de Cadastro | — | Completo | Gabriel Rosario |

@@ -10,6 +10,7 @@ import Home from '../pages/Home'
 import Usuarios from '../pages/Usuarios'
 import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
+import Agendamentos from '../pages/Agendamentos' // Importe o componente Agendamentos
 
 // Páginas ainda não implementadas (placeholder)
 const EmConstrucao = ({ titulo }) => (
@@ -45,7 +46,7 @@ function AppRoutes() {
 
       <Route path="/agendamentos" element={
         <PrivateRoute>
-          <EmConstrucao titulo="Agendamentos" />
+          <Agendamentos /> {/* Agora renderiza o componente real de Agendamentos */}
         </PrivateRoute>
       } />
 

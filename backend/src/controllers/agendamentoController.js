@@ -4,6 +4,10 @@
 
 const prisma = require('../prismaClient')
 
+async function notificar(usuarioId, mensagem) {
+  await prisma.notificacao.create({ data: { usuarioId, mensagem } })
+}
+
 // POST /api/agendamentos — JOGADOR cria um agendamento
 async function criar(req, res) {
   const { horarioId, data } = req.body
@@ -35,6 +39,12 @@ async function criar(req, res) {
         jogador: { select: { id: true, nome: true, email: true } }
       }
     })
+
+    // Notifica o dono do campo sobre a nova reserva
+    await notificar(
+      agendamento.horario.campo.donoId,
+      `Nova reserva de ${agendamento.jogador.nome} para ${agendamento.horario.campo.nome} em ${new Date(agendamento.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}.`
+    )
 
     return res.status(201).json({ mensagem: 'Agendamento criado com sucesso!', agendamento })
   } catch (error) {
@@ -139,6 +149,12 @@ async function confirmar(req, res) {
       }
     })
 
+    // Notifica o jogador que sua reserva foi confirmada
+    await notificar(
+      atualizado.jogador.id,
+      `Sua reserva em ${atualizado.horario.campo.nome} (${atualizado.horario.diaSemana}, ${atualizado.horario.horaInicio} às ${atualizado.horario.horaFim}) foi confirmada!`
+    )
+
     return res.status(200).json({ mensagem: 'Agendamento confirmado com sucesso!', agendamento: atualizado })
   } catch (error) {
     console.error('Erro ao confirmar agendamento:', error)
@@ -176,6 +192,19 @@ async function cancelar(req, res) {
       where: { id: Number(id) },
       data: { status: 'CANCELADO' }
     })
+
+    // Notifica a outra parte sobre o cancelamento
+    if (ehJogador) {
+      await notificar(
+        agendamento.horario.campo.donoId,
+        `A reserva de ${req.usuario.nome} para ${agendamento.horario.campo.nome} foi cancelada pelo jogador.`
+      )
+    } else if (ehDono) {
+      await notificar(
+        agendamento.jogadorId,
+        `Sua reserva em ${agendamento.horario.campo.nome} foi cancelada pelo dono do campo.`
+      )
+    }
 
     return res.status(200).json({ mensagem: 'Agendamento cancelado com sucesso.', agendamento: atualizado })
   } catch (error) {

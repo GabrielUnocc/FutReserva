@@ -35,8 +35,9 @@ model Usuario {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  campos       Campo[]
-  agendamentos Agendamento[]
+  campos        Campo[]
+  agendamentos  Agendamento[]
+  notificacoes  Notificacao[]
 }
 
 model Campo {
@@ -89,4 +90,14 @@ model Pagamento {
   createdAt     DateTime        @default(now())
 
   agendamento Agendamento @relation(fields: [agendamentoId], references: [id])
+}
+
+model Notificacao {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  mensagem  String
+  lida      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
 }

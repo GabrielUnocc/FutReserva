@@ -13,6 +13,7 @@ const mapaRotas = {
   'horarios': 'Horários',
   'agendamentos': 'Agendamentos',
   'confirmacoes': 'Confirmações',
+  'notificacoes': 'Notificações',
   'login': 'Login',
   'cadastro': 'Cadastro',
   'sem-permissao': 'Sem Permissão',

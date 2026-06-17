@@ -8,6 +8,7 @@ const cors = require('cors')
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const agendamentoRoutes = require('./routes/agendamentoRoutes')
+const notificacaoRoutes = require('./routes/notificacaoRoutes')
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -39,6 +40,9 @@ app.use('/api/usuarios', userRoutes)
 
 // Rotas de agendamentos (requer token JWT)
 app.use('/api/agendamentos', agendamentoRoutes)
+
+// Rotas de notificações (requer token JWT)
+app.use('/api/notificacoes', notificacaoRoutes)
 
 // ─── Inicialização ────────────────────────────────────────────────────────────
 

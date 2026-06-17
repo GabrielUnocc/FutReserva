@@ -12,6 +12,7 @@ import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
 import Agendamentos from '../pages/Agendamentos'
 import Confirmacoes from '../pages/Confirmacoes'
+import Notificacoes from '../pages/Notificacoes'
 
 // Páginas ainda não implementadas (placeholder)
 const EmConstrucao = ({ titulo }) => (
@@ -81,6 +82,13 @@ function AppRoutes() {
       <Route path="/usuarios" element={
         <PrivateRoute perfisPermitidos={['ADMIN']}>
           <Usuarios />
+        </PrivateRoute>
+      } />
+
+      {/* Notificações — qualquer usuário logado */}
+      <Route path="/notificacoes" element={
+        <PrivateRoute>
+          <Notificacoes />
         </PrivateRoute>
       } />
 

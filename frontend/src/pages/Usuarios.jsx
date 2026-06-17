@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { listarUsuarios, atualizarUsuario, deletarUsuario } from '../services/userService'
-import Navbar from '../components/Navbar'
+import Layout from '../components/Layout'
 
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([])
@@ -72,9 +72,7 @@ function Usuarios() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <Layout>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-800">Gerenciar Usuários</h1>
@@ -194,7 +192,7 @@ function Usuarios() {
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   )
 }
 

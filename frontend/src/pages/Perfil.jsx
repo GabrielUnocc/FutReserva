@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { atualizarUsuario } from '../services/userService'
-import Navbar from '../components/Navbar'
+import Layout from '../components/Layout'
 
 function Perfil() {
   const { usuario, salvarLogin } = useAuth()
@@ -53,9 +53,7 @@ function Perfil() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
+    <Layout>
       <div className="max-w-lg mx-auto px-4 py-10">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Meu Perfil</h1>
 
@@ -135,7 +133,7 @@ function Perfil() {
           </form>
         </div>
       </div>
-    </div>
+    </Layout>
   )
 }
 

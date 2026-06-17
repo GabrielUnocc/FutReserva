@@ -10,6 +10,8 @@ import Home from '../pages/Home'
 import Usuarios from '../pages/Usuarios'
 import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
+import Agendamentos from '../pages/Agendamentos'
+import Confirmacoes from '../pages/Confirmacoes'
 
 // Páginas ainda não implementadas (placeholder)
 const EmConstrucao = ({ titulo }) => (
@@ -44,8 +46,14 @@ function AppRoutes() {
       } />
 
       <Route path="/agendamentos" element={
-        <PrivateRoute>
-          <EmConstrucao titulo="Agendamentos" />
+        <PrivateRoute perfisPermitidos={['JOGADOR']}>
+          <Agendamentos />
+        </PrivateRoute>
+      } />
+
+      <Route path="/confirmacoes" element={
+        <PrivateRoute perfisPermitidos={['DONO']}>
+          <Confirmacoes />
         </PrivateRoute>
       } />
 

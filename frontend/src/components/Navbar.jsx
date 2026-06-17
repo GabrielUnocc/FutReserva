@@ -17,7 +17,7 @@ function Navbar() {
   const linksDono = [
     { label: 'Meus Campos', to: '/meus-campos' },
     { label: 'Horários', to: '/horarios' },
-    { label: 'Agendamentos', to: '/agendamentos' },
+    { label: 'Confirmações', to: '/confirmacoes' },
   ]
 
   // Links visíveis para JOGADOR

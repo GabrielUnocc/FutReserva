@@ -1,11 +1,29 @@
-# ⚽ FutReserva
+# FutReserva
 
-Sistema web para reserva de horários em campos de futebol.  
-Donos cadastram seus campos e horários disponíveis. Jogadores fazem reservas pelo app.
+Sistema web de gestão e agendamento de campos de futebol society.
+
+**Disciplina:** Desenvolvimento Web
+**Integrantes:** Bernardo, Gabriel Rosario, Rafael Lucas, Rafael Machado, Decarli
+
+
+---
+## Tecnologias utilizadas
+
+| Camada | Tecnologia |
+|---|---|
+| Linguagem | JavaScript (Node.js + React) |
+| Backend | Node.js + Express.js |
+| Frontend | React.js + Vite |
+| Banco de Dados | PostgreSQL |
+| ORM / Migrations | Prisma |
+| Autenticação | JWT (jsonwebtoken) + bcryptjs |
+| Estilização | Tailwind CSS |
+| HTTP Client | Axios |
+| Roteamento frontend | react-router-dom |
 
 ---
 
-## 🐳 Rodando com Docker (recomendado)
+##  Rodando com Docker
 
 ### Pré-requisitos
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando
@@ -16,12 +34,6 @@ Donos cadastram seus campos e horários disponíveis. Jogadores fazem reservas p
 # Na raiz do projeto (onde está o docker-compose.yml)
 docker compose up --build
 ```
-
-Aguarde as mensagens de inicialização. Na primeira vez, o Docker irá:
-1. Baixar as imagens do PostgreSQL e Node.js
-2. Instalar as dependências do backend e frontend
-3. Rodar as migrations do banco de dados
-4. Iniciar os 3 serviços
 
 ### Acessar o sistema
 
@@ -45,7 +57,7 @@ docker compose down -v
 
 ---
 
-## 💻 Rodando sem Docker (desenvolvimento local)
+##  Rodando sem Docker 
 
 ### Pré-requisitos
 - Node.js 20+
@@ -85,7 +97,7 @@ docker exec -it futreserva_db psql -U futreserva -d futreserva_db
 
 ---
 
-## 📋 Endpoints da API
+##  Endpoints da API
 
 ### Autenticação (público)
 | Método | Rota                  | Descrição          |
@@ -123,27 +135,125 @@ docker exec -it futreserva_db psql -U futreserva -d futreserva_db
 
 ---
 
-## 🏗️ Tecnologias
+## Criando o primeiro usuário ADMIN
 
-| Camada    | Tecnologia                         |
-|-----------|------------------------------------|
-| Backend   | Node.js + Express.js               |
-| Frontend  | React 18 + Vite                    |
-| Banco     | PostgreSQL 16                      |
-| ORM       | Prisma                             |
-| Auth      | JWT + bcryptjs                     |
-| Estilo    | Tailwind CSS                       |
-| HTTP      | Axios                              |
-| Infra     | Docker + Docker Compose            |
+O perfil ADMIN não pode ser criado pelo cadastro normal. Após criar uma conta no sistema, execute no PostgreSQL:
+
+```sql
+UPDATE "Usuario" SET perfil = 'ADMIN' WHERE email = 'seu@email.com';
+```
 
 ---
 
-## 👥 Equipe
+## Estrutura do projeto
 
-| Integrante         | Responsabilidade                          |
-|--------------------|-------------------------------------------|
-| Rafael Rockenbach  | CRUD Usuários + Login/Permissões          |
-| Rafael Almeida     | CRUD Horários + Agendamentos              |
-| Bernardo           | CRUD Confirmação de Agendamento           |
-| João Decarli       | CRUD Campos + Catálogo                    |
-| Gabriel Rosario    | CRUD Pagamentos                           |
+```
+futreserva/
+├── backend/
+│   ├── prisma/
+│   │   ├── schema.prisma           # Modelos do banco de dados
+│   │   └── migrations/             # Histórico de alterações no banco
+│   ├── src/
+│   │   ├── controllers/            # Lógica de negócio de cada módulo
+│   │   │   ├── authController.js
+│   │   │   └── userController.js
+│   │   ├── routes/                 # Endpoints da API REST
+│   │   │   ├── authRoutes.js
+│   │   │   └── userRoutes.js
+│   │   ├── middlewares/
+│   │   │   ├── authMiddleware.js       # Valida o token JWT
+│   │   │   └── permissaoMiddleware.js  # Valida o perfil do usuário
+│   │   ├── prismaClient.js         # Instância única do Prisma
+│   │   └── server.js               # Entrada do servidor
+│   ├── .env.example
+│   └── package.json
+│
+└── frontend/
+    └── src/
+        ├── pages/
+        │   ├── Login.jsx
+        │   ├── Cadastro.jsx
+        │   ├── Perfil.jsx
+        │   └── Usuarios.jsx
+        ├── components/
+        │   ├── Navbar.jsx
+        │   └── PrivateRoute.jsx
+        ├── services/
+        │   ├── api.js
+        │   ├── authService.js
+        │   └── userService.js
+        ├── contexts/
+        │   └── AuthContext.jsx
+        └── routes/
+            └── AppRoutes.jsx
+
+---
+
+## Perfis de acesso
+
+| Perfil | Permissões |
+|---|---|
+| **JOGADOR** | Ver catálogo de campos, criar e cancelar agendamentos, registrar pagamento |
+| **DONO** | Gerenciar seus campos, gerenciar horários, confirmar agendamentos |
+| **ADMIN** | Acesso total, gerenciar todos os usuários |
+
+---
+
+## Relatório de progresso
+
+### Implementado
+
+| Módulo | Backend | Frontend | Responsável |
+|---|---|---|---|
+| Autenticação (cadastro + login + JWT) | Completo | Completo | Gabriel Rosario |
+| Controle de permissões (authMiddleware + permissaoMiddleware) | Completo | Completo | Gabriel Rosario |
+| CRUD de Usuários | Completo | Completo | Gabriel Rosario |
+| Tela de Login | — | Completo | Gabriel Rosario |
+| Tela de Cadastro | — | Completo | Gabriel Rosario |
+| Tela de Perfil (editar próprios dados) | — | Completo | Gabriel Rosario |
+| Painel de usuários (ADMIN) | — | Completo | Gabriel Rosario |
+| Migrations do banco de dados | Completo | — | Todos |
+
+### Em desenvolvimento
+
+| Módulo | Responsável | Status |
+|---|---|---|
+| CRUD de Campos | Rafael Lucas | Em desenvolvimento |
+| Catálogo público de campos | Rafael Lucas | Em desenvolvimento |
+| Tela de detalhe do campo | Rafael Lucas | Em desenvolvimento |
+| CRUD de Horários disponíveis | Rafael Machado | Em desenvolvimento |
+| Tela de gerenciamento de horários | Rafael Machado | Em desenvolvimento |
+| CRUD de Agendamentos | Decarli | Em desenvolvimento |
+| Confirmação de agendamento | Decarli | Em desenvolvimento |
+| Cancelamento de agendamento | Decarli | Em desenvolvimento |
+| Registro de pagamento | Decarli | Em desenvolvimento |
+| Tela de horários confirmados (DONO) | Decarli | Em desenvolvimento |
+
+---
+
+## Checklist de funcionalidades (RF)
+
+- [x] RF01 — Cadastro de usuários jogadores
+- [x] RF02 — Cadastro de donos de campos
+- [x] RF03 — Login com controle de permissões (JWT)
+- [x] RF04 — CRUD de usuários e donos
+- [ ] RF05 — CRUD de campos de futebol
+- [ ] RF06 — Catálogo público de campos disponíveis
+- [ ] RF07 — CRUD de horários disponíveis
+- [ ] RF08 — CRUD de agendamentos
+- [ ] RF09 — Confirmação de agendamento pelo dono
+- [ ] RF10 — Registro de pagamento da reserva
+- [ ] RF11 — Cancelamento de agendamento
+- [ ] RF12 — Visualização de horários confirmados pelo dono
+
+---
+
+## Divisão de tarefas
+
+| Integrante | Módulo |
+|---|---|
+|  Gabriel Rosario  | Autenticação, login, JWT e middlewares de permissão |
+| Gabriel Rosario | CRUD de usuários, telas de login, cadastro e perfil |
+| Rafael Lucas | CRUD de campos e catálogo público |
+| Rafael Machado | CRUD de horários disponíveis |
+| Decarli | Agendamentos, confirmação, cancelamento e pagamentos |

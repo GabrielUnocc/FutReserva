@@ -10,6 +10,7 @@ import Home from '../pages/Home'
 import Usuarios from '../pages/Usuarios'
 import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
+import Horarios from '../pages/Horarios'
 
 // Páginas ainda não implementadas (placeholder)
 const EmConstrucao = ({ titulo }) => (
@@ -63,9 +64,10 @@ function AppRoutes() {
         </PrivateRoute>
       } />
 
-      <Route path="/horarios" element={
-        <PrivateRoute perfisPermitidos={['DONO']}>
-          <EmConstrucao titulo="Gerenciar Horários" />
+      {/* Gerenciamento de horários de um campo específico */}
+      <Route path="/campos/:campoId/horarios" element={
+        <PrivateRoute perfisPermitidos={['DONO', 'ADMIN']}>
+          <Horarios />
         </PrivateRoute>
       } />
 

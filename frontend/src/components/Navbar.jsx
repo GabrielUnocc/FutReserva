@@ -14,9 +14,9 @@ function Navbar() {
   }
 
   // Links visíveis para DONO DE CAMPO
+  // Horários é acessado via /campos/:id/horarios (a partir de Meus Campos)
   const linksDono = [
     { label: 'Meus Campos', to: '/meus-campos' },
-    { label: 'Horários', to: '/horarios' },
     { label: 'Agendamentos', to: '/agendamentos' },
   ]
 

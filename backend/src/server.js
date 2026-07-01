@@ -15,8 +15,19 @@ const dashboardRoutes = require('./routes/dashboardRoutes')
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Em dev, o front pode ser acessado por localhost, 127.0.0.1 ou pelo IP da rede local —
+// libera qualquer origem nessas variações pra evitar bloqueio de CORS no navegador.
+const origensPermitidas = process.env.CORS_ORIGIN
+  ? [process.env.CORS_ORIGIN]
+  : [/^http:\/\/localhost:5173$/, /^http:\/\/127\.0\.0\.1:5173$/, /^http:\/\/192\.168\.\d+\.\d+:5173$/]
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || origensPermitidas.some((padrao) => padrao.test ? padrao.test(origin) : padrao === origin)) {
+      return callback(null, true)
+    }
+    return callback(new Error('Origem não permitida pelo CORS.'))
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }))

@@ -7,7 +7,9 @@ const cors = require('cors')
 
 const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
+const campoRoutes = require('./routes/campoRoutes')
 const agendamentoRoutes = require('./routes/agendamentoRoutes')
+const pagamentoRoutes = require('./routes/pagamentoRoutes')
 const notificacaoRoutes = require('./routes/notificacaoRoutes')
 
 const app = express()
@@ -38,10 +40,10 @@ app.use('/api/auth', authRoutes)
 // Rotas de usuários (requer token JWT)
 app.use('/api/usuarios', userRoutes)
 
-// Rotas de agendamentos (requer token JWT)
+// Rotas de campos, agendamentos, pagamentos e notificações (requer token JWT)
+app.use('/api/campos', campoRoutes)
 app.use('/api/agendamentos', agendamentoRoutes)
-
-// Rotas de notificações (requer token JWT)
+app.use('/api/pagamentos', pagamentoRoutes)
 app.use('/api/notificacoes', notificacaoRoutes)
 
 // ─── Inicialização ────────────────────────────────────────────────────────────

@@ -27,8 +27,8 @@ function Navbar() {
   // Links visíveis para DONO DE CAMPO
   const linksDono = [
     { label: 'Meus Campos', to: '/meus-campos' },
-    { label: 'Horários', to: '/horarios' },
     { label: 'Confirmações', to: '/confirmacoes' },
+    { label: 'Agendamentos', to: '/agendamentos' },
   ]
 
   // Links visíveis para JOGADOR

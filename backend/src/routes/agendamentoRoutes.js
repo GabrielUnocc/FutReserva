@@ -1,31 +1,25 @@
 // src/routes/agendamentoRoutes.js
-// Rotas de agendamentos com controle de permissão por perfil
+// Rotas de agendamentos — todas exigem autenticação
 
 const express = require('express')
 const router = express.Router()
-const {
-  criar,
-  listarMeus,
-  listarPendentes,
-  listarConfirmados,
-  confirmar,
-  cancelar
-} = require('../controllers/agendamentoController')
+const { listar, criar, confirmar, cancelar } = require('../controllers/agendamentoController')
 const authMiddleware = require('../middlewares/authMiddleware')
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware')
 
+// Todas as rotas abaixo exigem autenticação
 router.use(authMiddleware)
 
-// JOGADOR
+// GET /api/agendamentos — Lista agendamentos (escopado por perfil no controller)
+router.get('/', listar)
+
+// POST /api/agendamentos — Somente JOGADOR pode criar
 router.post('/', permissaoMiddleware('JOGADOR'), criar)
-router.get('/meus', permissaoMiddleware('JOGADOR'), listarMeus)
 
-// DONO
-router.get('/pendentes', permissaoMiddleware('DONO'), listarPendentes)
-router.get('/confirmados', permissaoMiddleware('DONO'), listarConfirmados)
-router.patch('/:id/confirmar', permissaoMiddleware('DONO'), confirmar)
+// PUT /api/agendamentos/:id/confirmar — Somente DONO pode confirmar
+router.put('/:id/confirmar', permissaoMiddleware('DONO'), confirmar)
 
-// JOGADOR, DONO ou ADMIN (verificação de posse feita no controller)
-router.patch('/:id/cancelar', cancelar)
+// PUT /api/agendamentos/:id/cancelar — Jogador dono, DONO do campo ou ADMIN (checado no controller)
+router.put('/:id/cancelar', cancelar)
 
 module.exports = router

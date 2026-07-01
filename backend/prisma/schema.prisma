@@ -41,43 +41,34 @@ model Usuario {
 }
 
 model Campo {
-  id        Int      @id @default(autoincrement())
-  nome      String
-  endereco  String
-  descricao String?
-  preco     Float
-  donoId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  nome           String
+  endereco       String
+  descricao      String?
+  preco          Float
+  donoId         Int
+  horaAbertura   String
+  horaFechamento String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  dono     Usuario   @relation(fields: [donoId], references: [id])
-  horarios Horario[]
-}
-
-model Horario {
-  id         Int      @id @default(autoincrement())
-  campoId    Int
-  diaSemana  String
-  horaInicio String
-  horaFim    String
-  disponivel Boolean  @default(true)
-  createdAt  DateTime @default(now())
-
-  campo        Campo         @relation(fields: [campoId], references: [id])
+  dono         Usuario       @relation(fields: [donoId], references: [id])
   agendamentos Agendamento[]
 }
 
 model Agendamento {
-  id        Int               @id @default(autoincrement())
-  jogadorId Int
-  horarioId Int
-  data      DateTime
-  status    StatusAgendamento @default(PENDENTE)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id         Int               @id @default(autoincrement())
+  jogadorId  Int
+  campoId    Int
+  data       DateTime
+  horaInicio String
+  horaFim    String
+  status     StatusAgendamento @default(PENDENTE)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 
   jogador   Usuario    @relation(fields: [jogadorId], references: [id])
-  horario   Horario    @relation(fields: [horarioId], references: [id])
+  campo     Campo      @relation(fields: [campoId], references: [id])
   pagamento Pagamento?
 }
 

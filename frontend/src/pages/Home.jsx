@@ -15,8 +15,8 @@ function Home() {
 
   const acoesDono = [
     { label: '🏟️ Meus Campos', to: '/meus-campos', desc: 'Gerencie seus campos' },
-    { label: '🕐 Horários', to: '/horarios', desc: 'Configure os horários disponíveis' },
     { label: '✅ Confirmações', to: '/confirmacoes', desc: 'Confirme ou rejeite reservas dos jogadores' },
+    { label: '📅 Agendamentos', to: '/agendamentos', desc: 'Veja e confirme reservas' },
   ]
 
   const acoesAdmin = [

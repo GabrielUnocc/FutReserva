@@ -13,17 +13,8 @@ import SemPermissao from '../pages/SemPermissao'
 import Agendamentos from '../pages/Agendamentos'
 import Confirmacoes from '../pages/Confirmacoes'
 import Notificacoes from '../pages/Notificacoes'
-
-// Páginas ainda não implementadas (placeholder)
-const EmConstrucao = ({ titulo }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <div className="text-center">
-      <p className="text-5xl mb-4">🚧</p>
-      <h1 className="text-xl font-bold text-gray-700">{titulo}</h1>
-      <p className="text-gray-400 text-sm mt-2">Em desenvolvimento...</p>
-    </div>
-  </div>
-)
+import Campos from '../pages/Campos'
+import MeusCampos from '../pages/MeusCampos'
 
 function AppRoutes() {
   return (
@@ -47,7 +38,7 @@ function AppRoutes() {
       } />
 
       <Route path="/agendamentos" element={
-        <PrivateRoute perfisPermitidos={['JOGADOR']}>
+        <PrivateRoute>
           <Agendamentos />
         </PrivateRoute>
       } />
@@ -61,20 +52,14 @@ function AppRoutes() {
       {/* ─── Rotas de JOGADOR ───────────────────────────── */}
       <Route path="/campos" element={
         <PrivateRoute perfisPermitidos={['JOGADOR', 'ADMIN']}>
-          <EmConstrucao titulo="Catálogo de Campos" />
+          <Campos />
         </PrivateRoute>
       } />
 
       {/* ─── Rotas de DONO DE CAMPO ─────────────────────── */}
       <Route path="/meus-campos" element={
         <PrivateRoute perfisPermitidos={['DONO']}>
-          <EmConstrucao titulo="Meus Campos" />
-        </PrivateRoute>
-      } />
-
-      <Route path="/horarios" element={
-        <PrivateRoute perfisPermitidos={['DONO']}>
-          <EmConstrucao titulo="Gerenciar Horários" />
+          <MeusCampos />
         </PrivateRoute>
       } />
 

@@ -1,66 +1,29 @@
 // src/controllers/agendamentoController.js
-// CRUD de confirmação de agendamentos (RF08, RF09, RF11, RF12)
-// Responsável: Bernardo Dal Piva
+// CRUD de agendamentos (RF08, RF09, RF11)
 
 const prisma = require('../prismaClient')
 
-async function notificar(usuarioId, mensagem) {
-  await prisma.notificacao.create({ data: { usuarioId, mensagem } })
+const INCLUDE_PADRAO = {
+  campo: true,
+  jogador: { select: { id: true, nome: true, email: true } },
+  pagamento: true
 }
 
-// POST /api/agendamentos — JOGADOR cria um agendamento
-async function criar(req, res) {
-  const { horarioId, data } = req.body
-  const jogadorId = req.usuario.id
-
+// GET /api/agendamentos — Lista agendamentos, escopado por perfil
+async function listar(req, res) {
   try {
-    const horario = await prisma.horario.findUnique({ where: { id: Number(horarioId) } })
-    if (!horario) return res.status(404).json({ erro: 'Horário não encontrado.' })
-    if (!horario.disponivel) return res.status(400).json({ erro: 'Este horário não está disponível.' })
+    let where = {}
 
-    const conflito = await prisma.agendamento.findFirst({
-      where: {
-        horarioId: Number(horarioId),
-        data: new Date(data),
-        status: { in: ['PENDENTE', 'CONFIRMADO'] }
-      }
-    })
-    if (conflito) return res.status(409).json({ erro: 'Este horário já está reservado para esta data.' })
+    if (req.usuario.perfil === 'JOGADOR') {
+      where = { jogadorId: req.usuario.id }
+    } else if (req.usuario.perfil === 'DONO') {
+      where = { campo: { donoId: req.usuario.id } }
+    }
+    // ADMIN não tem filtro — vê todos os agendamentos
 
-    const agendamento = await prisma.agendamento.create({
-      data: {
-        jogadorId,
-        horarioId: Number(horarioId),
-        data: new Date(data),
-        status: 'PENDENTE'
-      },
-      include: {
-        horario: { include: { campo: true } },
-        jogador: { select: { id: true, nome: true, email: true } }
-      }
-    })
-
-    // Notifica o dono do campo sobre a nova reserva
-    await notificar(
-      agendamento.horario.campo.donoId,
-      `Nova reserva de ${agendamento.jogador.nome} para ${agendamento.horario.campo.nome} em ${new Date(agendamento.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}.`
-    )
-
-    return res.status(201).json({ mensagem: 'Agendamento criado com sucesso!', agendamento })
-  } catch (error) {
-    console.error('Erro ao criar agendamento:', error)
-    return res.status(500).json({ erro: 'Erro ao criar agendamento.' })
-  }
-}
-
-// GET /api/agendamentos/meus — JOGADOR lista seus agendamentos
-async function listarMeus(req, res) {
-  const jogadorId = req.usuario.id
-
-  try {
     const agendamentos = await prisma.agendamento.findMany({
-      where: { jogadorId },
-      include: { horario: { include: { campo: true } } },
+      where,
+      include: INCLUDE_PADRAO,
       orderBy: { data: 'desc' }
     })
 
@@ -71,146 +34,162 @@ async function listarMeus(req, res) {
   }
 }
 
-// GET /api/agendamentos/pendentes — DONO lista pendentes dos seus campos
-async function listarPendentes(req, res) {
-  const donoId = req.usuario.id
+// POST /api/agendamentos — Cria um agendamento (somente JOGADOR)
+async function criar(req, res) {
+  const { campoId, data, horaInicio, horaFim } = req.body
+
+  if (!campoId || !data || !horaInicio || !horaFim) {
+    return res.status(400).json({ erro: 'Campo, data, hora de início e hora de fim são obrigatórios.' })
+  }
+
+  if (horaFim <= horaInicio) {
+    return res.status(400).json({ erro: 'A hora de fim deve ser depois da hora de início.' })
+  }
 
   try {
-    const agendamentos = await prisma.agendamento.findMany({
+    const campo = await prisma.campo.findUnique({ where: { id: Number(campoId) } })
+
+    if (!campo) {
+      return res.status(404).json({ erro: 'Campo não encontrado.' })
+    }
+
+    if (horaInicio < campo.horaAbertura || horaFim > campo.horaFechamento) {
+      return res.status(400).json({
+        erro: `Este campo funciona das ${campo.horaAbertura} às ${campo.horaFechamento}.`
+      })
+    }
+
+    const dataNormalizada = new Date(`${data}T00:00:00.000Z`)
+
+    const conflito = await prisma.agendamento.findFirst({
       where: {
-        status: 'PENDENTE',
-        horario: { campo: { donoId } }
-      },
-      include: {
-        horario: { include: { campo: true } },
-        jogador: { select: { id: true, nome: true, email: true } }
-      },
-      orderBy: { createdAt: 'asc' }
+        campoId: Number(campoId),
+        data: dataNormalizada,
+        status: { in: ['PENDENTE', 'CONFIRMADO'] },
+        horaInicio: { lt: horaFim },
+        horaFim: { gt: horaInicio }
+      }
     })
 
-    return res.status(200).json(agendamentos)
+    if (conflito) {
+      return res.status(409).json({ erro: 'Já existe uma reserva que ocupa esse horário nesta data.' })
+    }
+
+    const novoAgendamento = await prisma.agendamento.create({
+      data: {
+        jogadorId: req.usuario.id,
+        campoId: Number(campoId),
+        data: dataNormalizada,
+        horaInicio,
+        horaFim,
+        status: 'PENDENTE'
+      },
+      include: INCLUDE_PADRAO
+    })
+
+    return res.status(201).json({
+      mensagem: 'Agendamento criado com sucesso!',
+      agendamento: novoAgendamento
+    })
   } catch (error) {
-    console.error('Erro ao listar pendentes:', error)
-    return res.status(500).json({ erro: 'Erro ao buscar agendamentos pendentes.' })
+    console.error('Erro ao criar agendamento:', error)
+    return res.status(500).json({ erro: 'Erro ao criar agendamento.' })
   }
 }
 
-// GET /api/agendamentos/confirmados — DONO lista confirmados dos seus campos (RF12)
-async function listarConfirmados(req, res) {
-  const donoId = req.usuario.id
-
-  try {
-    const agendamentos = await prisma.agendamento.findMany({
-      where: {
-        status: 'CONFIRMADO',
-        horario: { campo: { donoId } }
-      },
-      include: {
-        horario: { include: { campo: true } },
-        jogador: { select: { id: true, nome: true, email: true } }
-      },
-      orderBy: { data: 'asc' }
-    })
-
-    return res.status(200).json(agendamentos)
-  } catch (error) {
-    console.error('Erro ao listar confirmados:', error)
-    return res.status(500).json({ erro: 'Erro ao buscar agendamentos confirmados.' })
-  }
-}
-
-// PATCH /api/agendamentos/:id/confirmar — DONO confirma um agendamento (RF09)
+// PUT /api/agendamentos/:id/confirmar — Confirma um agendamento (somente o DONO do campo)
 async function confirmar(req, res) {
   const { id } = req.params
-  const donoId = req.usuario.id
 
   try {
     const agendamento = await prisma.agendamento.findUnique({
       where: { id: Number(id) },
-      include: { horario: { include: { campo: true } } }
+      include: { campo: true }
     })
 
-    if (!agendamento) return res.status(404).json({ erro: 'Agendamento não encontrado.' })
+    if (!agendamento) {
+      return res.status(404).json({ erro: 'Agendamento não encontrado.' })
+    }
 
-    if (agendamento.horario.campo.donoId !== donoId) {
-      return res.status(403).json({ erro: 'Você não tem permissão para confirmar este agendamento.' })
+    if (agendamento.campo.donoId !== req.usuario.id) {
+      return res.status(403).json({ erro: 'Você só pode confirmar agendamentos dos seus próprios campos.' })
     }
 
     if (agendamento.status !== 'PENDENTE') {
-      return res.status(400).json({ erro: `Agendamento já está com status: ${agendamento.status}.` })
+      return res.status(400).json({ erro: 'Apenas agendamentos pendentes podem ser confirmados.' })
     }
 
-    const atualizado = await prisma.agendamento.update({
+    const agendamentoAtualizado = await prisma.agendamento.update({
       where: { id: Number(id) },
       data: { status: 'CONFIRMADO' },
-      include: {
-        horario: { include: { campo: true } },
-        jogador: { select: { id: true, nome: true, email: true } }
-      }
+      include: INCLUDE_PADRAO
     })
 
-    // Notifica o jogador que sua reserva foi confirmada
-    await notificar(
-      atualizado.jogador.id,
-      `Sua reserva em ${atualizado.horario.campo.nome} (${atualizado.horario.diaSemana}, ${atualizado.horario.horaInicio} às ${atualizado.horario.horaFim}) foi confirmada!`
-    )
-
-    return res.status(200).json({ mensagem: 'Agendamento confirmado com sucesso!', agendamento: atualizado })
+    return res.status(200).json({
+      mensagem: 'Agendamento confirmado com sucesso!',
+      agendamento: agendamentoAtualizado
+    })
   } catch (error) {
     console.error('Erro ao confirmar agendamento:', error)
+    if (error.code === 'P2025') {
+      return res.status(404).json({ erro: 'Agendamento não encontrado.' })
+    }
     return res.status(500).json({ erro: 'Erro ao confirmar agendamento.' })
   }
 }
 
-// PATCH /api/agendamentos/:id/cancelar — DONO ou JOGADOR cancela (RF11)
+// PUT /api/agendamentos/:id/cancelar — Cancela um agendamento
+// Permitido para: o próprio jogador, o dono do campo ou um ADMIN
 async function cancelar(req, res) {
   const { id } = req.params
-  const usuarioId = req.usuario.id
-  const perfil = req.usuario.perfil
 
   try {
     const agendamento = await prisma.agendamento.findUnique({
       where: { id: Number(id) },
-      include: { horario: { include: { campo: true } } }
+      include: { campo: true, pagamento: true }
     })
 
-    if (!agendamento) return res.status(404).json({ erro: 'Agendamento não encontrado.' })
+    if (!agendamento) {
+      return res.status(404).json({ erro: 'Agendamento não encontrado.' })
+    }
 
-    const ehDono = perfil === 'DONO' && agendamento.horario.campo.donoId === usuarioId
-    const ehJogador = agendamento.jogadorId === usuarioId
-    const ehAdmin = perfil === 'ADMIN'
+    const ehJogadorDono = agendamento.jogadorId === req.usuario.id
+    const ehDonoDoCampo = agendamento.campo.donoId === req.usuario.id
+    const ehAdmin = req.usuario.perfil === 'ADMIN'
 
-    if (!ehDono && !ehJogador && !ehAdmin) {
+    if (!ehJogadorDono && !ehDonoDoCampo && !ehAdmin) {
       return res.status(403).json({ erro: 'Você não tem permissão para cancelar este agendamento.' })
     }
 
     if (agendamento.status === 'CANCELADO') {
-      return res.status(400).json({ erro: 'Este agendamento já está cancelado.' })
+      return res.status(400).json({ erro: 'Agendamento já está cancelado.' })
     }
 
-    const atualizado = await prisma.agendamento.update({
+    const agendamentoAtualizado = await prisma.agendamento.update({
       where: { id: Number(id) },
-      data: { status: 'CANCELADO' }
+      data: { status: 'CANCELADO' },
+      include: INCLUDE_PADRAO
     })
 
-    // Notifica a outra parte sobre o cancelamento
-    if (ehJogador) {
-      await notificar(
-        agendamento.horario.campo.donoId,
-        `A reserva de ${req.usuario.nome} para ${agendamento.horario.campo.nome} foi cancelada pelo jogador.`
-      )
-    } else if (ehDono) {
-      await notificar(
-        agendamento.jogadorId,
-        `Sua reserva em ${agendamento.horario.campo.nome} foi cancelada pelo dono do campo.`
-      )
+    if (agendamento.pagamento) {
+      await prisma.pagamento.update({
+        where: { agendamentoId: Number(id) },
+        data: { status: 'CANCELADO' }
+      })
+      agendamentoAtualizado.pagamento.status = 'CANCELADO'
     }
 
-    return res.status(200).json({ mensagem: 'Agendamento cancelado com sucesso.', agendamento: atualizado })
+    return res.status(200).json({
+      mensagem: 'Agendamento cancelado com sucesso.',
+      agendamento: agendamentoAtualizado
+    })
   } catch (error) {
     console.error('Erro ao cancelar agendamento:', error)
+    if (error.code === 'P2025') {
+      return res.status(404).json({ erro: 'Agendamento não encontrado.' })
+    }
     return res.status(500).json({ erro: 'Erro ao cancelar agendamento.' })
   }
 }
 
-module.exports = { criar, listarMeus, listarPendentes, listarConfirmados, confirmar, cancelar }
+module.exports = { listar, criar, confirmar, cancelar }

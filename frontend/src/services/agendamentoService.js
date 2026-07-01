@@ -1,34 +1,24 @@
 // src/services/agendamentoService.js
-// Funções de comunicação com a API de agendamentos
+// Funções de chamada à API para agendamentos
 
 import api from './api'
 
+export async function listarAgendamentos() {
+  const resposta = await api.get('/agendamentos')
+  return resposta.data
+}
+
 export async function criarAgendamento(dados) {
-  const res = await api.post('/agendamentos', dados)
-  return res.data
-}
-
-export async function getMeusAgendamentos() {
-  const res = await api.get('/agendamentos/meus')
-  return res.data
-}
-
-export async function getAgendamentosPendentes() {
-  const res = await api.get('/agendamentos/pendentes')
-  return res.data
-}
-
-export async function getAgendamentosConfirmados() {
-  const res = await api.get('/agendamentos/confirmados')
-  return res.data
+  const resposta = await api.post('/agendamentos', dados)
+  return resposta.data
 }
 
 export async function confirmarAgendamento(id) {
-  const res = await api.patch(`/agendamentos/${id}/confirmar`)
-  return res.data
+  const resposta = await api.put(`/agendamentos/${id}/confirmar`)
+  return resposta.data
 }
 
 export async function cancelarAgendamento(id) {
-  const res = await api.patch(`/agendamentos/${id}/cancelar`)
-  return res.data
+  const resposta = await api.put(`/agendamentos/${id}/cancelar`)
+  return resposta.data
 }

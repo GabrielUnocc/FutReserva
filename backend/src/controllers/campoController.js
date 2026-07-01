@@ -83,6 +83,9 @@ async function criar(req, res) {
     return res.status(201).json({ mensagem: 'Campo criado com sucesso!', campo })
   } catch (error) {
     console.error('Erro ao criar campo:', error)
+    if (error.code === 'P2003') {
+      return res.status(401).json({ erro: 'Sua sessão é inválida. Faça login novamente.' })
+    }
     return res.status(500).json({ erro: 'Erro ao criar campo.' })
   }
 }

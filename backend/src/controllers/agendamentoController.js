@@ -48,6 +48,9 @@ async function criar(req, res) {
 
     return res.status(201).json(novoAgendamento)
   } catch (error) {
+    if (error.code === 'P2003') {
+      return res.status(401).json({ erro: 'Sua sessão é inválida. Faça login novamente.' })
+    }
     return res.status(500).json({ erro: 'Erro ao processar agendamento.' })
   }
 }

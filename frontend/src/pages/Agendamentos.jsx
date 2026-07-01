@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { listarAgendamentos, confirmarAgendamento, cancelarAgendamento } from '../services/agendamentoService'
 import { useAuth } from '../contexts/AuthContext'
+import Navbar from '../components/Navbar'
 
 function Agendamentos() {
   const [agendamentos, setAgendamentos] = useState([])
@@ -44,10 +45,19 @@ function Agendamentos() {
     }
   }
 
-  if (carregando) return <div className="p-8 text-center">Carregando agendamentos...</div>
+  if (carregando) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="p-8 text-center">Carregando agendamentos...</div>
+      </div>
+    )
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="max-w-6xl mx-auto p-6">
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-verde-800">
           {usuario.perfil === 'DONO' ? 'Gerenciar Reservas' : 'Meus Agendamentos'}
@@ -121,6 +131,7 @@ function Agendamentos() {
           ))}
         </div>
       )}
+      </div>
     </div>
   )
 }

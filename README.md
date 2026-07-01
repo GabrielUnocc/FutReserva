@@ -133,6 +133,16 @@ docker exec -it futreserva_db psql -U futreserva -d futreserva_db
 | DELETE | /api/campos/:id/horarios/:hid                     | DONO/ADMIN  | Excluir horário        |
 | PATCH  | /api/campos/:id/horarios/:hid/disponibilidade     | DONO/ADMIN  | Ativar/desativar       |
 
+### 5. Rodando Backend e Frontend simultaneamente
+
+Na raiz do projeto (`/FutReserva`), você pode iniciar ambos com um único comando:
+
+```bash
+npm install
+npm run dev
+```
+*Isso utiliza o pacote `concurrently` para gerenciar os dois processos em um único terminal.*
+
 ---
 
 ## Criando o primeiro usuário ADMIN
@@ -156,10 +166,14 @@ futreserva/
 │   ├── src/
 │   │   ├── controllers/            # Lógica de negócio de cada módulo
 │   │   │   ├── authController.js
-│   │   │   └── userController.js
+│   │   │   ├── userController.js
+│   │   │   ├── agendamentoController.js
+│   │   │   └── pagamentoController.js
 │   │   ├── routes/                 # Endpoints da API REST
 │   │   │   ├── authRoutes.js
-│   │   │   └── userRoutes.js
+│   │   │   ├── userRoutes.js
+│   │   │   ├── agendamentoRoutes.js
+│   │   │   └── pagamentoRoutes.js
 │   │   ├── middlewares/
 │   │   │   ├── authMiddleware.js       # Valida o token JWT
 │   │   │   └── permissaoMiddleware.js  # Valida o perfil do usuário
@@ -173,6 +187,7 @@ futreserva/
         ├── pages/
         │   ├── Login.jsx
         │   ├── Cadastro.jsx
+        │   ├── Agendamentos.jsx        # Tela de listagem e gestão de agendamentos
         │   ├── Perfil.jsx
         │   └── Usuarios.jsx
         ├── components/
@@ -181,7 +196,9 @@ futreserva/
         ├── services/
         │   ├── api.js
         │   ├── authService.js
-        │   └── userService.js
+        │   ├── userService.js
+        │   ├── agendamentoService.js
+        │   └── pagamentoService.js
         ├── contexts/
         │   └── AuthContext.jsx
         └── routes/
@@ -213,6 +230,11 @@ futreserva/
 | Tela de Perfil (editar próprios dados) | — | Completo | Gabriel Rosario |
 | Painel de usuários (ADMIN) | — | Completo | Gabriel Rosario |
 | Migrations do banco de dados | Completo | — | Todos |
+| CRUD de Agendamentos | Completo | Completo | João Decarli |
+| Confirmação de agendamento | Completo | Completo | João Decarli |
+| Cancelamento de agendamento | Completo | Completo | João Decarli |
+| Registro de pagamento | Completo | Completo | João Decarli |
+| Tela de horários confirmados (DONO) | Completo | Completo | João Decarli |
 
 ### Em desenvolvimento
 
@@ -223,11 +245,6 @@ futreserva/
 | Tela de detalhe do campo | Rafael Lucas | Em desenvolvimento |
 | CRUD de Horários disponíveis | Rafael Machado | Em desenvolvimento |
 | Tela de gerenciamento de horários | Rafael Machado | Em desenvolvimento |
-| CRUD de Agendamentos | Decarli | Em desenvolvimento |
-| Confirmação de agendamento | Decarli | Em desenvolvimento |
-| Cancelamento de agendamento | Decarli | Em desenvolvimento |
-| Registro de pagamento | Decarli | Em desenvolvimento |
-| Tela de horários confirmados (DONO) | Decarli | Em desenvolvimento |
 
 ---
 
@@ -240,11 +257,11 @@ futreserva/
 - [ ] RF05 — CRUD de campos de futebol
 - [ ] RF06 — Catálogo público de campos disponíveis
 - [ ] RF07 — CRUD de horários disponíveis
-- [ ] RF08 — CRUD de agendamentos
-- [ ] RF09 — Confirmação de agendamento pelo dono
-- [ ] RF10 — Registro de pagamento da reserva
-- [ ] RF11 — Cancelamento de agendamento
-- [ ] RF12 — Visualização de horários confirmados pelo dono
+- [x] RF08 — CRUD de agendamentos
+- [x] RF09 — Confirmação de agendamento pelo dono
+- [x] RF10 — Registro de pagamento da reserva
+- [x] RF11 — Cancelamento de agendamento
+- [x] RF12 — Visualização de horários confirmados pelo dono
 
 ---
 

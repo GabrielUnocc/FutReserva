@@ -11,6 +11,7 @@ import Usuarios from '../pages/Usuarios'
 import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
 import Horarios from '../pages/Horarios'
+import Agendamentos from '../pages/Agendamentos'
 
 // Páginas ainda não implementadas (placeholder)
 const EmConstrucao = ({ titulo }) => (
@@ -46,7 +47,7 @@ function AppRoutes() {
 
       <Route path="/agendamentos" element={
         <PrivateRoute>
-          <EmConstrucao titulo="Agendamentos" />
+          <Agendamentos /> {/* Agora renderiza o componente real de Agendamentos */}
         </PrivateRoute>
       } />
 

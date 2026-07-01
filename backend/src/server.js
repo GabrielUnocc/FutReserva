@@ -7,6 +7,8 @@ const authRoutes = require('./routes/authRoutes')
 const userRoutes = require('./routes/userRoutes')
 const campoRoutes = require('./routes/campoRoutes')
 const horarioRoutes = require('./routes/horarioRoutes')
+const agendamentoRoutes = require('./routes/agendamentoRoutes')
+const pagamentoRoutes = require('./routes/pagamentoRoutes')
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -25,8 +27,10 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes)
 app.use('/api/usuarios', userRoutes)
-app.use('/api/campos', campoRoutes)                          // adicionado no commit 3
-app.use('/api/campos/:campoId/horarios', horarioRoutes)      // adicionado no commit 2
+app.use('/api/campos', campoRoutes)
+app.use('/api/campos/:campoId/horarios', horarioRoutes)
+app.use('/api/agendamentos', agendamentoRoutes)
+app.use('/api/pagamentos', pagamentoRoutes)
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor FutReserva rodando em http://localhost:${PORT}`)

@@ -10,6 +10,7 @@ const horarioRoutes = require('./routes/horarioRoutes')
 const agendamentoRoutes = require('./routes/agendamentoRoutes')
 const pagamentoRoutes = require('./routes/pagamentoRoutes')
 const notificacaoRoutes = require('./routes/notificacaoRoutes')
+const dashboardRoutes = require('./routes/dashboardRoutes')
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -33,6 +34,7 @@ app.use('/api/campos/:campoId/horarios', horarioRoutes)
 app.use('/api/agendamentos', agendamentoRoutes)
 app.use('/api/pagamentos', pagamentoRoutes)
 app.use('/api/notificacoes', notificacaoRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 app.listen(PORT, () => {
   console.log(`✅ Servidor FutReserva rodando em http://localhost:${PORT}`)

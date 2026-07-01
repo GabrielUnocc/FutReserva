@@ -15,6 +15,7 @@ import Agendamentos from '../pages/Agendamentos'
 import Notificacoes from '../pages/Notificacoes'
 import Campos from '../pages/Campos'
 import MeusCampos from '../pages/MeusCampos'
+import Dashboard from '../pages/Dashboard'
 
 function AppRoutes() {
   return (
@@ -54,6 +55,12 @@ function AppRoutes() {
       <Route path="/meus-campos" element={
         <PrivateRoute perfisPermitidos={['DONO']}>
           <MeusCampos />
+        </PrivateRoute>
+      } />
+
+      <Route path="/dashboard" element={
+        <PrivateRoute perfisPermitidos={['DONO']}>
+          <Dashboard />
         </PrivateRoute>
       } />
 

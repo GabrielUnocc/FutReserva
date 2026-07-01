@@ -14,6 +14,7 @@ function Home() {
   ]
 
   const acoesDono = [
+    { label: '📊 Dashboard', to: '/dashboard', desc: 'Receita, ocupação e próximas reservas' },
     { label: '🏟️ Meus Campos', to: '/meus-campos', desc: 'Gerencie seus campos e horários' },
     { label: '📅 Agendamentos', to: '/agendamentos', desc: 'Veja e confirme reservas' },
   ]

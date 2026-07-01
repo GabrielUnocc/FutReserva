@@ -1,6 +1,10 @@
 // src/controllers/agendamentoController.js
 const prisma = require('../prismaClient')
 
+async function notificar(usuarioId, mensagem) {
+  await prisma.notificacao.create({ data: { usuarioId, mensagem } })
+}
+
 // POST /api/agendamentos — Cria um novo agendamento (JOGADOR)
 async function criar(req, res) {
   const { horarioId, data } = req.body
@@ -17,8 +21,18 @@ async function criar(req, res) {
         horarioId: Number(horarioId),
         data: new Date(data),
         status: 'PENDENTE'
+      },
+      include: {
+        jogador: { select: { nome: true } },
+        horario: { include: { campo: true } }
       }
     })
+
+    await notificar(
+      novoAgendamento.horario.campo.donoId,
+      `Nova reserva de ${novoAgendamento.jogador.nome} para ${novoAgendamento.horario.campo.nome} em ${new Date(novoAgendamento.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}.`
+    )
+
     return res.status(201).json(novoAgendamento)
   } catch (error) {
     return res.status(500).json({ erro: 'Erro ao processar agendamento.' })
@@ -67,6 +81,12 @@ async function confirmar(req, res) {
       where: { id: Number(id) },
       data: { status: 'CONFIRMADO' }
     })
+
+    await notificar(
+      agendamento.jogadorId,
+      `Sua reserva em ${agendamento.horario.campo.nome} (${agendamento.horario.diaSemana}, ${agendamento.horario.horaInicio} às ${agendamento.horario.horaFim}) foi confirmada!`
+    )
+
     return res.status(200).json(atualizado)
   } catch (error) {
     return res.status(500).json({ erro: 'Erro ao confirmar agendamento.' })
@@ -97,6 +117,19 @@ async function cancelar(req, res) {
       where: { id: Number(id) },
       data: { status: 'CANCELADO' }
     })
+
+    if (isJogador) {
+      await notificar(
+        agendamento.horario.campo.donoId,
+        `A reserva de ${req.usuario.nome} para ${agendamento.horario.campo.nome} foi cancelada pelo jogador.`
+      )
+    } else if (isDono) {
+      await notificar(
+        agendamento.jogadorId,
+        `Sua reserva em ${agendamento.horario.campo.nome} foi cancelada pelo dono do campo.`
+      )
+    }
+
     return res.status(200).json(cancelado)
   } catch (error) {
     return res.status(500).json({ erro: 'Erro ao cancelar agendamento.' })

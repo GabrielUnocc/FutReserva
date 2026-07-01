@@ -12,6 +12,7 @@ import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
 import Horarios from '../pages/Horarios'
 import Agendamentos from '../pages/Agendamentos'
+import Notificacoes from '../pages/Notificacoes'
 
 // Páginas ainda não implementadas (placeholder)
 const EmConstrucao = ({ titulo }) => (
@@ -69,6 +70,13 @@ function AppRoutes() {
       <Route path="/campos/:campoId/horarios" element={
         <PrivateRoute perfisPermitidos={['DONO', 'ADMIN']}>
           <Horarios />
+        </PrivateRoute>
+      } />
+
+      {/* Notificações — qualquer usuário logado */}
+      <Route path="/notificacoes" element={
+        <PrivateRoute>
+          <Notificacoes />
         </PrivateRoute>
       } />
 

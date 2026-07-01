@@ -37,6 +37,7 @@ model Usuario {
 
   campos       Campo[]
   agendamentos Agendamento[]
+  notificacoes Notificacao[]
 }
 
 model Campo {
@@ -81,13 +82,23 @@ model Agendamento {
 }
 
 model Pagamento {
-  id            Int             @id @default(autoincrement())
-  agendamentoId Int             @unique
-  valor         Float
+  id              Int             @id @default(autoincrement())
+  agendamentoId   Int             @unique
+  valor           Float
   metodoPagamento String
   dataPagamento   DateTime        @default(now())
-  status        StatusPagamento @default(PENDENTE)
-  createdAt     DateTime        @default(now())
+  status          StatusPagamento @default(PENDENTE)
+  createdAt       DateTime        @default(now())
 
   agendamento Agendamento @relation(fields: [agendamentoId], references: [id])
+}
+
+model Notificacao {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  mensagem  String
+  lida      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
 }

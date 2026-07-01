@@ -1,12 +1,23 @@
 // src/components/Navbar.jsx
 // Barra de navegação exibida em todas as páginas protegidas
 
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { getNaoLidasCount } from '../services/notificacaoService'
 
 function Navbar() {
   const { usuario, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [naoLidas, setNaoLidas] = useState(0)
+
+  useEffect(() => {
+    if (!usuario) return
+    getNaoLidasCount()
+      .then(setNaoLidas)
+      .catch(() => {})
+  }, [usuario, location.pathname])
 
   function handleLogout() {
     logout()
@@ -60,6 +71,16 @@ function Navbar() {
 
         {/* Usuário logado e logout */}
         <div className="flex items-center gap-4">
+          {/* Sino de notificações */}
+          <Link to="/notificacoes" className="relative text-white hover:text-verde-100 transition-colors" title="Notificações">
+            <span className="text-lg">🔔</span>
+            {naoLidas > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {naoLidas > 9 ? '9+' : naoLidas}
+              </span>
+            )}
+          </Link>
+
           <Link to="/perfil" className="text-sm text-verde-100 hover:text-white transition-colors">
             {usuario?.nome}
           </Link>

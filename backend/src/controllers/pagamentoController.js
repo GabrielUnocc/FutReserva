@@ -28,6 +28,9 @@ async function registrar(req, res) {
     return res.status(201).json(pagamento)
   } catch (error) {
     console.error('Erro ao registrar pagamento:', error)
+    if (error.code === 'P2002') {
+      return res.status(409).json({ erro: 'Já existe um pagamento registrado para este agendamento.' })
+    }
     return res.status(500).json({ erro: 'Erro ao processar pagamento.' })
   }
 }

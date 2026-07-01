@@ -15,6 +15,19 @@ async function criar(req, res) {
   }
 
   try {
+    const horario = await prisma.horario.findUnique({ where: { id: Number(horarioId) } })
+    if (!horario) return res.status(404).json({ erro: 'Horário não encontrado.' })
+    if (!horario.disponivel) return res.status(400).json({ erro: 'Este horário não está disponível.' })
+
+    const conflito = await prisma.agendamento.findFirst({
+      where: {
+        horarioId: Number(horarioId),
+        data: new Date(data),
+        status: { in: ['PENDENTE', 'CONFIRMADO'] }
+      }
+    })
+    if (conflito) return res.status(409).json({ erro: 'Este horário já está reservado para esta data.' })
+
     const novoAgendamento = await prisma.agendamento.create({
       data: {
         jogadorId,

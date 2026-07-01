@@ -132,6 +132,9 @@ async function deletar(req, res) {
   } catch (error) {
     console.error('Erro ao deletar campo:', error)
     if (error.code === 'P2025') return res.status(404).json({ erro: 'Campo não encontrado.' })
+    if (error.code === 'P2003') {
+      return res.status(409).json({ erro: 'Não é possível remover: existem horários cadastrados para este campo.' })
+    }
     return res.status(500).json({ erro: 'Erro ao remover campo.' })
   }
 }

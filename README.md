@@ -5,8 +5,8 @@ Sistema web de gestão e agendamento de campos de futebol society.
 **Disciplina:** Desenvolvimento Web
 **Integrantes:** Bernardo, Gabriel Rosario, Rafael Lucas, Rafael Machado, Decarli
 
----
 
+---
 ## Tecnologias utilizadas
 
 | Camada | Tecnologia |
@@ -23,64 +23,61 @@ Sistema web de gestão e agendamento de campos de futebol society.
 
 ---
 
-## Pré-requisitos
+##  Rodando com Docker
 
-- [Node.js](https://nodejs.org/) v18 ou superior
-- [PostgreSQL](https://www.postgresql.org/download/) v14 ou superior
-- [Git](https://git-scm.com/)
+### Pré-requisitos
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando
+
+### Subir tudo com um comando
+
+```bash
+# Na raiz do projeto (onde está o docker-compose.yml)
+docker compose up --build
+```
+
+### Acessar o sistema
+
+| Serviço   | URL                        |
+|-----------|----------------------------|
+| Frontend  | http://localhost:5173      |
+| Backend   | http://localhost:3001      |
+| Banco     | localhost:5432             |
+
+### Parar os containers
+
+```bash
+docker compose down
+```
+
+Para apagar também os dados do banco:
+
+```bash
+docker compose down -v
+```
 
 ---
 
-## Como rodar o projeto
+##  Rodando sem Docker 
 
-### 1. Clone o repositório
+### Pré-requisitos
+- Node.js 20+
+- PostgreSQL rodando localmente
 
-```bash
-git clone https://github.com/GabrielUnocc/FutReserva.git
-cd FutReserva
-```
-
-### 2. Crie o banco de dados
-
-Abra o terminal do PostgreSQL e execute:
-
-```sql
-CREATE DATABASE futreserva;
-```
-
-### 3. Configure e inicie o backend
+### Backend
 
 ```bash
 cd backend
-npm install
+
+# Copie o arquivo de ambiente
 cp .env.example .env
-```
+# Edite .env com sua DATABASE_URL local
 
-Edite o arquivo `.env` com seus dados:
-
-```env
-DATABASE_URL="postgresql://SEU_USUARIO:SUA_SENHA@localhost:5432/futreserva"
-JWT_SECRET="futreserva_chave_secreta_2025"
-PORT=3001
-```
-
-Execute as migrations para criar as tabelas:
-
-```bash
+npm install
 npx prisma migrate dev
-```
-
-Inicie o servidor:
-
-```bash
 npm run dev
 ```
 
-Backend disponível em: **http://localhost:3001**
-
-### 4. Configure e inicie o frontend
-
-Em um novo terminal:
+### Frontend
 
 ```bash
 cd frontend
@@ -88,7 +85,63 @@ npm install
 npm run dev
 ```
 
-Frontend disponível em: **http://localhost:5173**
+---
+
+## 🗄️ Banco de Dados
+
+Acesso direto ao PostgreSQL dentro do Docker:
+
+```bash
+docker exec -it futreserva_db psql -U futreserva -d futreserva_db
+```
+
+---
+
+##  Endpoints da API
+
+### Autenticação (público)
+| Método | Rota                  | Descrição          |
+|--------|-----------------------|--------------------|
+| POST   | /api/auth/cadastro    | Criar conta        |
+| POST   | /api/auth/login       | Login              |
+
+### Usuários (requer token)
+| Método | Rota                  | Perfil       | Descrição            |
+|--------|-----------------------|--------------|----------------------|
+| GET    | /api/usuarios         | ADMIN        | Listar usuários      |
+| GET    | /api/usuarios/:id     | Autenticado  | Buscar por ID        |
+| PUT    | /api/usuarios/:id     | Próprio/ADMIN| Atualizar            |
+| DELETE | /api/usuarios/:id     | ADMIN        | Remover              |
+
+### Campos (requer token)
+| Método | Rota                  | Perfil       | Descrição            |
+|--------|-----------------------|--------------|----------------------|
+| GET    | /api/campos           | Autenticado  | Listar campos        |
+| GET    | /api/campos/meus      | DONO/ADMIN   | Meus campos          |
+| GET    | /api/campos/:id       | Autenticado  | Buscar campo         |
+| POST   | /api/campos           | DONO/ADMIN   | Criar campo          |
+| PUT    | /api/campos/:id       | DONO/ADMIN   | Editar campo         |
+| DELETE | /api/campos/:id       | DONO/ADMIN   | Remover campo        |
+
+### Horários (requer token)
+| Método | Rota                                              | Perfil      | Descrição              |
+|--------|---------------------------------------------------|-------------|------------------------|
+| GET    | /api/campos/:id/horarios                          | Autenticado | Listar horários        |
+| GET    | /api/campos/:id/horarios/:hid                     | Autenticado | Buscar horário         |
+| POST   | /api/campos/:id/horarios                          | DONO/ADMIN  | Criar horário          |
+| PUT    | /api/campos/:id/horarios/:hid                     | DONO/ADMIN  | Editar horário         |
+| DELETE | /api/campos/:id/horarios/:hid                     | DONO/ADMIN  | Excluir horário        |
+| PATCH  | /api/campos/:id/horarios/:hid/disponibilidade     | DONO/ADMIN  | Ativar/desativar       |
+
+### 5. Rodando Backend e Frontend simultaneamente
+
+Na raiz do projeto (`/FutReserva`), você pode iniciar ambos com um único comando:
+
+```bash
+npm install
+npm run dev
+```
+*Isso utiliza o pacote `concurrently` para gerenciar os dois processos em um único terminal.*
 
 ---
 
@@ -113,10 +166,14 @@ futreserva/
 │   ├── src/
 │   │   ├── controllers/            # Lógica de negócio de cada módulo
 │   │   │   ├── authController.js
-│   │   │   └── userController.js
+│   │   │   ├── userController.js
+│   │   │   ├── agendamentoController.js
+│   │   │   └── pagamentoController.js
 │   │   ├── routes/                 # Endpoints da API REST
 │   │   │   ├── authRoutes.js
-│   │   │   └── userRoutes.js
+│   │   │   ├── userRoutes.js
+│   │   │   ├── agendamentoRoutes.js
+│   │   │   └── pagamentoRoutes.js
 │   │   ├── middlewares/
 │   │   │   ├── authMiddleware.js       # Valida o token JWT
 │   │   │   └── permissaoMiddleware.js  # Valida o perfil do usuário
@@ -130,6 +187,7 @@ futreserva/
         ├── pages/
         │   ├── Login.jsx
         │   ├── Cadastro.jsx
+        │   ├── Agendamentos.jsx        # Tela de listagem e gestão de agendamentos
         │   ├── Perfil.jsx
         │   └── Usuarios.jsx
         ├── components/
@@ -138,12 +196,13 @@ futreserva/
         ├── services/
         │   ├── api.js
         │   ├── authService.js
-        │   └── userService.js
+        │   ├── userService.js
+        │   ├── agendamentoService.js
+        │   └── pagamentoService.js
         ├── contexts/
         │   └── AuthContext.jsx
         └── routes/
             └── AppRoutes.jsx
-```
 
 ---
 
@@ -154,61 +213,6 @@ futreserva/
 | **JOGADOR** | Ver catálogo de campos, criar e cancelar agendamentos, registrar pagamento |
 | **DONO** | Gerenciar seus campos, gerenciar horários, confirmar agendamentos |
 | **ADMIN** | Acesso total, gerenciar todos os usuários |
-
----
-
-## Endpoints da API
-
-### Autenticação (sem token)
-
-| Método | Rota | Descrição |
-|---|---|---|
-| POST | `/api/auth/cadastro` | Cadastrar novo usuário |
-| POST | `/api/auth/login` | Fazer login e receber token JWT |
-
-### Usuários (requer token)
-
-| Método | Rota | Perfil |
-|---|---|---|
-| GET | `/api/usuarios` | ADMIN |
-| GET | `/api/usuarios/:id` | Autenticado |
-| PUT | `/api/usuarios/:id` | Próprio usuário ou ADMIN |
-| DELETE | `/api/usuarios/:id` | ADMIN |
-
-### Campos (a implementar)
-
-| Método | Rota | Perfil |
-|---|---|---|
-| GET | `/api/campos` | Público |
-| GET | `/api/campos/:id` | Público |
-| POST | `/api/campos` | DONO |
-| PUT | `/api/campos/:id` | DONO (próprio) |
-| DELETE | `/api/campos/:id` | DONO (próprio) |
-
-### Horários (a implementar)
-
-| Método | Rota | Perfil |
-|---|---|---|
-| GET | `/api/horarios/campo/:campoId` | Público |
-| POST | `/api/horarios` | DONO |
-| PUT | `/api/horarios/:id` | DONO |
-| DELETE | `/api/horarios/:id` | DONO |
-
-### Agendamentos (a implementar)
-
-| Método | Rota | Perfil |
-|---|---|---|
-| GET | `/api/agendamentos` | Autenticado |
-| POST | `/api/agendamentos` | JOGADOR |
-| PUT | `/api/agendamentos/:id/confirmar` | DONO |
-| PUT | `/api/agendamentos/:id/cancelar` | Autenticado |
-
-### Pagamentos (a implementar)
-
-| Método | Rota | Perfil |
-|---|---|---|
-| POST | `/api/pagamentos` | JOGADOR |
-| GET | `/api/pagamentos/:agendamentoId` | Autenticado |
 
 ---
 
@@ -226,6 +230,11 @@ futreserva/
 | Tela de Perfil (editar próprios dados) | — | Completo | Gabriel Rosario |
 | Painel de usuários (ADMIN) | — | Completo | Gabriel Rosario |
 | Migrations do banco de dados | Completo | — | Todos |
+| CRUD de Agendamentos | Completo | Completo | João Decarli |
+| Confirmação de agendamento | Completo | Completo | João Decarli |
+| Cancelamento de agendamento | Completo | Completo | João Decarli |
+| Registro de pagamento | Completo | Completo | João Decarli |
+| Tela de horários confirmados (DONO) | Completo | Completo | João Decarli |
 
 ### Em desenvolvimento
 
@@ -236,11 +245,6 @@ futreserva/
 | Tela de detalhe do campo | Rafael Lucas | Em desenvolvimento |
 | CRUD de Horários disponíveis | Rafael Machado | Em desenvolvimento |
 | Tela de gerenciamento de horários | Rafael Machado | Em desenvolvimento |
-| CRUD de Agendamentos | Decarli | Em desenvolvimento |
-| Confirmação de agendamento | Decarli | Em desenvolvimento |
-| Cancelamento de agendamento | Decarli | Em desenvolvimento |
-| Registro de pagamento | Decarli | Em desenvolvimento |
-| Tela de horários confirmados (DONO) | Decarli | Em desenvolvimento |
 
 ---
 
@@ -253,11 +257,11 @@ futreserva/
 - [ ] RF05 — CRUD de campos de futebol
 - [ ] RF06 — Catálogo público de campos disponíveis
 - [ ] RF07 — CRUD de horários disponíveis
-- [ ] RF08 — CRUD de agendamentos
-- [ ] RF09 — Confirmação de agendamento pelo dono
-- [ ] RF10 — Registro de pagamento da reserva
-- [ ] RF11 — Cancelamento de agendamento
-- [ ] RF12 — Visualização de horários confirmados pelo dono
+- [x] RF08 — CRUD de agendamentos
+- [x] RF09 — Confirmação de agendamento pelo dono
+- [x] RF10 — Registro de pagamento da reserva
+- [x] RF11 — Cancelamento de agendamento
+- [x] RF12 — Visualização de horários confirmados pelo dono
 
 ---
 

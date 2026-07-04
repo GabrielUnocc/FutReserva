@@ -10,17 +10,12 @@ import Home from '../pages/Home'
 import Usuarios from '../pages/Usuarios'
 import Perfil from '../pages/Perfil'
 import SemPermissao from '../pages/SemPermissao'
-
-// Páginas ainda não implementadas (placeholder)
-const EmConstrucao = ({ titulo }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <div className="text-center">
-      <p className="text-5xl mb-4">🚧</p>
-      <h1 className="text-xl font-bold text-gray-700">{titulo}</h1>
-      <p className="text-gray-400 text-sm mt-2">Em desenvolvimento...</p>
-    </div>
-  </div>
-)
+import Horarios from '../pages/Horarios'
+import Agendamentos from '../pages/Agendamentos'
+import Notificacoes from '../pages/Notificacoes'
+import Campos from '../pages/Campos'
+import MeusCampos from '../pages/MeusCampos'
+import Dashboard from '../pages/Dashboard'
 
 function AppRoutes() {
   return (
@@ -45,27 +40,41 @@ function AppRoutes() {
 
       <Route path="/agendamentos" element={
         <PrivateRoute>
-          <EmConstrucao titulo="Agendamentos" />
+          <Agendamentos />
         </PrivateRoute>
       } />
 
       {/* ─── Rotas de JOGADOR ───────────────────────────── */}
       <Route path="/campos" element={
         <PrivateRoute perfisPermitidos={['JOGADOR', 'ADMIN']}>
-          <EmConstrucao titulo="Catálogo de Campos" />
+          <Campos />
         </PrivateRoute>
       } />
 
       {/* ─── Rotas de DONO DE CAMPO ─────────────────────── */}
       <Route path="/meus-campos" element={
         <PrivateRoute perfisPermitidos={['DONO']}>
-          <EmConstrucao titulo="Meus Campos" />
+          <MeusCampos />
         </PrivateRoute>
       } />
 
-      <Route path="/horarios" element={
+      <Route path="/dashboard" element={
         <PrivateRoute perfisPermitidos={['DONO']}>
-          <EmConstrucao titulo="Gerenciar Horários" />
+          <Dashboard />
+        </PrivateRoute>
+      } />
+
+      {/* Gerenciamento de horários de um campo específico */}
+      <Route path="/campos/:campoId/horarios" element={
+        <PrivateRoute perfisPermitidos={['DONO', 'ADMIN']}>
+          <Horarios />
+        </PrivateRoute>
+      } />
+
+      {/* Notificações — qualquer usuário logado */}
+      <Route path="/notificacoes" element={
+        <PrivateRoute>
+          <Notificacoes />
         </PrivateRoute>
       } />
 

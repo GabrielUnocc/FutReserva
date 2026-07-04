@@ -106,6 +106,9 @@ async function deletar(req, res) {
     if (error.code === 'P2025') {
       return res.status(404).json({ erro: 'Usuário não encontrado.' })
     }
+    if (error.code === 'P2003') {
+      return res.status(409).json({ erro: 'Não é possível remover: este usuário possui campos ou agendamentos vinculados.' })
+    }
     return res.status(500).json({ erro: 'Erro ao remover usuário.' })
   }
 }

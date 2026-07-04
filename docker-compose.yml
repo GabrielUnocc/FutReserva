@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  # ─── Banco de Dados PostgreSQL ───────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: futreserva_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: futreserva
+      POSTGRES_PASSWORD: futreserva123
+      POSTGRES_DB: futreserva_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U futreserva -d futreserva_db']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ─── Backend Node.js / Express ───────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: futreserva_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://futreserva:futreserva123@db:5432/futreserva_db
+      JWT_SECRET: futreserva_jwt_secret_dev_2026
+      NODE_ENV: development
+      PORT: 3001
+    ports:
+      - '3001:3001'
+    volumes:
+      # Monta o código para hot-reload com nodemon
+      - ./backend:/app
+      - /app/node_modules
+    command: sh -c "npx prisma migrate deploy && node src/server.js"
+
+  # ─── Frontend React / Vite ───────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: futreserva_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+
+volumes:
+  postgres_data:

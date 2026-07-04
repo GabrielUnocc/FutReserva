@@ -2,6 +2,7 @@
 // Resumo gerencial para o DONO: receita, ocupação e próximas reservas
 
 const prisma = require('../prismaClient')
+const { calcularDuracaoHoras } = require('../utils/tempo')
 
 // GET /api/dashboard — Resumo dos campos do dono logado
 async function resumo(req, res) {
@@ -12,8 +13,7 @@ async function resumo(req, res) {
       where: { horario: { campo: { donoId } } },
       include: {
         horario: { include: { campo: true } },
-        jogador: { select: { nome: true, email: true } },
-        pagamento: true
+        jogador: { select: { nome: true, email: true } }
       },
       orderBy: { data: 'asc' }
     })
@@ -25,20 +25,30 @@ async function resumo(req, res) {
     const totalValidos = total - cancelados
     const taxaConfirmacao = totalValidos > 0 ? Math.round((confirmados / totalValidos) * 100) : 0
 
-    const receitaTotal = agendamentos
-      .filter((a) => a.pagamento?.status === 'PAGO')
-      .reduce((soma, a) => soma + a.pagamento.valor, 0)
+    const agora = new Date()
+    const hojeSemHora = new Date(agora.toDateString())
 
-    const receitaPorCampo = {}
+    // Valor gerado pelos agendamentos CONFIRMADOs cuja data já passou — calculado pelo
+    // preço do campo x duração do horário, independente de haver Pagamento registrado
+    let valorRealizado = 0
+    const valorRealizadoPorCampo = {}
     for (const a of agendamentos) {
-      if (a.pagamento?.status !== 'PAGO') continue
+      if (a.status !== 'CONFIRMADO' || new Date(a.data) >= hojeSemHora) continue
+
+      const duracaoHoras = calcularDuracaoHoras(a.horario.horaInicio, a.horario.horaFim)
+      const valor = a.horario.campo.preco * duracaoHoras
       const nomeCampo = a.horario.campo.nome
-      receitaPorCampo[nomeCampo] = (receitaPorCampo[nomeCampo] || 0) + a.pagamento.valor
+
+      valorRealizado += valor
+      valorRealizadoPorCampo[nomeCampo] = (valorRealizadoPorCampo[nomeCampo] || 0) + valor
+    }
+    valorRealizado = Math.round(valorRealizado * 100) / 100
+    for (const nomeCampo in valorRealizadoPorCampo) {
+      valorRealizadoPorCampo[nomeCampo] = Math.round(valorRealizadoPorCampo[nomeCampo] * 100) / 100
     }
 
-    const agora = new Date()
     const proximasReservas = agendamentos
-      .filter((a) => a.status !== 'CANCELADO' && new Date(a.data) >= new Date(agora.toDateString()))
+      .filter((a) => a.status !== 'CANCELADO' && new Date(a.data) >= hojeSemHora)
       .slice(0, 10)
       .map((a) => ({
         id: a.id,
@@ -56,8 +66,8 @@ async function resumo(req, res) {
       pendentes,
       cancelados,
       taxaConfirmacao,
-      receitaTotal,
-      receitaPorCampo,
+      valorRealizado,
+      valorRealizadoPorCampo,
       proximasReservas
     })
   } catch (error) {

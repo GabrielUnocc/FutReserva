@@ -1,6 +1,9 @@
 // src/controllers/agendamentoController.js
 const prisma = require('../prismaClient')
 
+// Índice = Date.prototype.getUTCDay() (0 = Domingo ... 6 = Sábado)
+const DIAS_SEMANA_POR_INDICE = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+
 async function notificar(usuarioId, mensagem) {
   await prisma.notificacao.create({ data: { usuarioId, mensagem } })
 }
@@ -18,6 +21,14 @@ async function criar(req, res) {
     const horario = await prisma.horario.findUnique({ where: { id: Number(horarioId) } })
     if (!horario) return res.status(404).json({ erro: 'Horário não encontrado.' })
     if (!horario.disponivel) return res.status(400).json({ erro: 'Este horário não está disponível.' })
+
+    // O horário é um template recorrente por dia da semana — a data escolhida precisa cair nesse dia
+    const diaDaData = DIAS_SEMANA_POR_INDICE[new Date(data).getUTCDay()]
+    if (diaDaData !== horario.diaSemana) {
+      return res.status(400).json({
+        erro: `Este horário é recorrente às ${horario.diaSemana}s. A data informada cai em uma ${diaDaData}.`
+      })
+    }
 
     const conflito = await prisma.agendamento.findFirst({
       where: {
@@ -91,6 +102,9 @@ async function confirmar(req, res) {
     if (!agendamento) return res.status(404).json({ erro: 'Agendamento não encontrado.' })
     if (perfil !== 'ADMIN' && agendamento.horario.campo.donoId !== usuarioId) {
       return res.status(403).json({ erro: 'Apenas o dono do campo pode confirmar.' })
+    }
+    if (agendamento.status !== 'PENDENTE') {
+      return res.status(409).json({ erro: `Apenas agendamentos pendentes podem ser confirmados (status atual: ${agendamento.status}).` })
     }
 
     const atualizado = await prisma.agendamento.update({

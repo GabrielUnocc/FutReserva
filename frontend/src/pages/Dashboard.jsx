@@ -58,7 +58,7 @@ function Dashboard() {
         ) : resumo ? (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-              <Cartao titulo="Receita total" valor={`R$ ${resumo.receitaTotal.toFixed(2)}`} cor="text-verde-700" />
+              <Cartao titulo="Valor realizado" valor={`R$ ${resumo.valorRealizado.toFixed(2)}`} cor="text-verde-700" />
               <Cartao titulo="Confirmados" valor={resumo.confirmados} cor="text-green-600" />
               <Cartao titulo="Pendentes" valor={resumo.pendentes} cor="text-yellow-600" />
               <Cartao titulo="Cancelados" valor={resumo.cancelados} cor="text-red-500" />
@@ -75,11 +75,12 @@ function Dashboard() {
               <p className="text-xs text-gray-400 mt-1">{resumo.taxaConfirmacao}% dos agendamentos não cancelados foram confirmados</p>
             </div>
 
-            {Object.keys(resumo.receitaPorCampo).length > 0 && (
+            {Object.keys(resumo.valorRealizadoPorCampo).length > 0 && (
               <div className="bg-white rounded-2xl shadow-md p-6 mb-8">
-                <p className="text-sm font-medium text-gray-700 mb-3">Receita por campo</p>
+                <p className="text-sm font-medium text-gray-700 mb-1">Valor realizado por campo</p>
+                <p className="text-xs text-gray-400 mb-3">Reservas confirmadas cuja data já passou (preço do campo × horas jogadas)</p>
                 <div className="space-y-2">
-                  {Object.entries(resumo.receitaPorCampo).map(([campo, valor]) => (
+                  {Object.entries(resumo.valorRealizadoPorCampo).map(([campo, valor]) => (
                     <div key={campo} className="flex justify-between text-sm">
                       <span className="text-gray-600">{campo}</span>
                       <span className="font-semibold text-verde-700">R$ {valor.toFixed(2)}</span>
